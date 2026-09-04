@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel Metabólico HGSOC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+
+<style>
+:root{
+  --ground:#F5F4F8;
+  --surface:#FFFFFF;
+  --surface-2:#EEEDF4;
+  --ink:#1A1D30;
+  --ink-2:#4A4F6B;
+  --ink-3:#767B96;
+  --line:#DEDCE8;
+  --line-strong:#C6C3D6;
+  --accent:#C22B1C;
+  --accent-soft:#FBE9E6;
+  --indigo:#3A4A8F;
+  --indigo-soft:#E7E9F6;
+  --shadow:0 1px 2px rgba(26,29,48,.05), 0 8px 24px -16px rgba(26,29,48,.28);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#121320;
+    --surface:#1A1C2B;
+    --surface-2:#222438;
+    --ink:#E9E8F2;
+    --ink-2:#B0B3C9;
+    --ink-3:#868AA5;
+    --line:#2C2F45;
+    --line-strong:#3D4159;
+    --accent:#FF6A54;
+    --accent-soft:#33191A;
+    --indigo:#93A3EE;
+    --indigo-soft:#1E2340;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#121320;
+  --surface:#1A1C2B;
+  --surface-2:#222438;
+  --ink:#E9E8F2;
+  --ink-2:#B0B3C9;
+  --ink-3:#868AA5;
+  --line:#2C2F45;
+  --line-strong:#3D4159;
+  --accent:#FF6A54;
+  --accent-soft:#33191A;
+  --indigo:#93A3EE;
+  --indigo-soft:#1E2340;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  font-size:16px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px 96px;}
+.prose{max-width:68ch;}
+
+/* ---------- header ---------- */
+.masthead{
+  border-bottom:1px solid var(--line);
+  padding:56px 0 34px;
+  margin-bottom:44px;
+  display:flex;flex-direction:column;gap:18px;
+}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);font-weight:600;
+}
+h1{
+  font-family:Spectral,Georgia,serif;
+  font-weight:600;
+  font-size:clamp(2.1rem,5vw,3.15rem);
+  line-height:1.08;
+  letter-spacing:-.015em;
+  margin:0;
+  text-wrap:balance;
+}
+h1 em{font-style:italic;color:var(--indigo);}
+.standfirst{
+  font-family:Spectral,Georgia,serif;
+  font-size:clamp(1.05rem,2.2vw,1.28rem);
+  line-height:1.5;
+  color:var(--ink-2);
+  max-width:60ch;
+  margin:0;
+}
+.meta{
+  display:flex;flex-wrap:wrap;gap:8px 22px;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:11.5px;letter-spacing:.06em;
+  color:var(--ink-3);text-transform:uppercase;
+}
+
+/* ---------- sections ---------- */
+section{margin-bottom:56px;}
+h2{
+  font-family:Spectral,Georgia,serif;
+  font-weight:600;
+  font-size:clamp(1.45rem,3vw,1.85rem);
+  line-height:1.2;
+  letter-spacing:-.01em;
+  margin:0 0 6px;
+  text-wrap:balance;
+}
+h3{
+  font-family:"IBM Plex Sans",sans-serif;
+  font-weight:600;font-size:1rem;
+  margin:34px 0 8px;
+  color:var(--ink);
+}
+.axis-head{
+  display:flex;align-items:baseline;gap:14px;
+  border-top:2px solid var(--ink);
+  padding-top:14px;margin-bottom:8px;
+}
+.axis-tag{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:11.5px;font-weight:600;letter-spacing:.1em;
+  color:var(--ink-3);white-space:nowrap;padding-top:6px;
+}
+.lede{color:var(--ink-2);max-width:68ch;margin:0 0 20px;}
+p{margin:0 0 16px;}
+a{color:var(--indigo);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px;}
+a:hover{color:var(--accent);}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px;}
+
+/* ---------- callout ---------- */
+.callout{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-left:3px solid var(--accent);
+  border-radius:3px;
+  padding:20px 24px;
+  box-shadow:var(--shadow);
+  margin-bottom:44px;
+}
+.callout h3{margin-top:0;}
+.callout p:last-child{margin-bottom:0;}
+
+/* ---------- tables ---------- */
+.tablebox{
+  overflow-x:auto;
+  border:1px solid var(--line);
+  border-radius:3px;
+  background:var(--surface);
+  box-shadow:var(--shadow);
+  margin-bottom:8px;
+}
+table{border-collapse:collapse;width:100%;min-width:840px;font-size:14.5px;}
+thead th{
+  text-align:left;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  font-weight:600;color:var(--ink-3);
+  padding:12px 16px;
+  border-bottom:1px solid var(--line-strong);
+  background:var(--surface-2);
+  white-space:nowrap;
+}
+tbody td{
+  padding:14px 16px;
+  border-bottom:1px solid var(--line);
+  vertical-align:top;
+  color:var(--ink-2);
+  line-height:1.5;
+}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:var(--surface-2);}
+td.gene{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-weight:600;font-size:13.5px;
+  color:var(--ink);white-space:nowrap;
+}
+td.gene small{
+  display:block;font-family:"IBM Plex Sans",sans-serif;
+  font-weight:400;font-size:11.5px;color:var(--ink-3);
+  letter-spacing:0;margin-top:2px;white-space:normal;
+}
+td.ev{font-size:13px;color:var(--ink-3);}
+.prio{white-space:nowrap;width:1%;}
+.chip{
+  display:inline-block;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:10px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;
+  padding:3px 8px;border-radius:2px;border:1px solid transparent;
+}
+.chip.n{background:var(--accent-soft);color:var(--accent);border-color:var(--accent);}
+.chip.e{background:var(--indigo-soft);color:var(--indigo);border-color:var(--indigo);}
+.chip.x{background:transparent;color:var(--ink-3);border-color:var(--line-strong);}
+.tnote{
+  font-size:12.5px;color:var(--ink-3);
+  max-width:68ch;margin:0 0 4px;
+}
+
+/* ---------- tier legend ---------- */
+.tiers{
+  display:grid;gap:14px;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  margin:22px 0 8px;
+}
+.tier{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:3px;padding:16px 18px;box-shadow:var(--shadow);
+}
+.tier p{margin:8px 0 0;font-size:13.5px;color:var(--ink-2);line-height:1.5;}
+
+/* ---------- keeper list ---------- */
+ul,ol{margin:0 0 16px;padding-left:1.15em;}
+li{margin-bottom:8px;color:var(--ink-2);}
+li strong{color:var(--ink);}
+code{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:.9em;background:var(--surface-2);
+  padding:1px 5px;border-radius:2px;color:var(--ink);
+}
+
+/* ---------- refs ---------- */
+.refs{font-size:13.5px;}
+.refs ol{padding-left:1.6em;}
+.refs li{margin-bottom:10px;color:var(--ink-2);}
+
+footer{
+  border-top:1px solid var(--line);
+  padding-top:22px;margin-top:56px;
+  font-size:12.5px;color:var(--ink-3);max-width:68ch;
+}
+
+@media (max-width:640px){
+  .masthead{padding-top:38px;}
+  .wrap{padding:0 18px 64px;}
+  .axis-head{flex-direction:column;gap:2px;}
+  .axis-tag{padding-top:0;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <div class="eyebrow">Painel de marcadores · transcriptoma espacial ou bulk</div>
+  <h1>Metabolismo lipídico e glicolítico como <em>preditores de disseminação peritoneal</em> no HGSOC</h1>
+  <p class="standfirst">Desenho modular por eixo biológico — dois blocos, lipídico (Eixos 1-8) e glicolítico (Eixos 9-11) —, com evidência de câncer de ovário e de outras neoplasias, e uma leitura própria para desenho em bulk RNA-seq isolado.</p>
+  <div class="meta">
+    <span>Agosto 2026 · atualizado setembro 2026</span>
+    <span>Projeto de mestrado · G. Prates</span>
+    <span>Tumor primário · estádios avançados</span>
+    <span>v2 — inclui eixo glicolítico + cenário bulk</span>
+  </div>
+</header>
+
+<div class="callout">
+  <h3>Duas correções de nomenclatura antes de qualquer coisa</h3>
+  <p><strong>CD36</strong> (translocase de ácidos graxos, <em>FAT</em>) é o gene que você quer — <code>CD36</code>. <code>CR1</code>/CD35 é receptor de complemento e não pertence ao eixo lipídico; ainda assim, veja o Eixo 8: há evidência de 2025 ligando complemento (C3/C5) à interface adipócito–tumor justamente no HGSOC omental, então o "erro" aponta para algo real.</p>
+  <p><strong>SCD1</strong> não é símbolo oficial HGNC. O gene humano é <code>SCD</code> (o parálogo é <code>SCD5</code>). Se você enviar "SCD1" para desenho de sonda ou para uma consulta de anotação, corre o risco de não bater. Idem para "ACC1" → <code>ACACA</code>, "COX-2" → <code>PTGS2</code>, "autotaxina" → <code>ENPP2</code>, "ATGL" → <code>PNPLA2</code>.</p>
+</div>
+
+<section>
+  <div class="axis-head"><h2>Como o painel está organizado</h2></div>
+  <p class="lede">Como a plataforma ainda não está definida, o painel está em três camadas. Se você acabar em Visium/Visium HD (transcriptoma completo), as camadas viram <em>módulos de assinatura</em> para pontuar por spot (AUCell/ssGSEA) em vez de genes isolados. Se acabar em Xenium/CosMx (painel dirigido, slots limitados), a camada Núcleo é o que entra primeiro e o Eixo 8 é obrigatório — sem marcadores de tipo celular você não consegue dizer <em>qual célula</em> está expressando o quê, que é justamente o ganho do espacial sobre bulk.</p>
+
+  <div class="tiers">
+    <div class="tier">
+      <span class="chip n">Núcleo</span>
+      <p>Evidência direta em ovário <em>e</em> ligação mecanística com disseminação/agressividade. Entra em qualquer desenho, inclusive painel pequeno.</p>
+    </div>
+    <div class="tier">
+      <span class="chip e">Expansão</span>
+      <p>Evidência forte, mas em geral de outros tumores ou de contexto metastático (não do primário). Entra se houver espaço.</p>
+    </div>
+    <div class="tier">
+      <span class="chip x">Exploratório</span>
+      <p>Hipótese plausível, evidência ainda escassa ou expressão baixa demais para detecção confiável. Só em transcriptoma completo.</p>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:8px;">
+    <h3>Um quarto cenário: bulk RNA-seq isolado, sem plataforma espacial</h3>
+    <p>Aqui a lógica muda de novo. Bulk mede o transcriptoma inteiro — como o Visium, não existe "vaga" limitada, então <strong>os três níveis (Núcleo, Expansão e Exploratório) entram todos</strong>, sem custo de oportunidade em escolher. A diferença séria é a resolução: Visium ainda preserva alguma geografia do tecido; bulk mistura tudo num tubo só. Isso torna o <strong>Eixo 8 (contexto celular) obrigatório, não opcional</strong> — sem marcadores de tipo celular, você não tem absolutamente nenhuma forma de saber se um escore lipídico ou glicolítico alto veio do tumor ou do adipócito/macrófago vizinho, e a única saída é computacional: deconvolução (BayesPrism/CIBERSORTx) usando esses genes como referência. Ver "Plano B — desenho em bulk" e "Fase 2" adiante, que já assumem esse cenário.</p>
+  </div>
+</section>
+
+<section>
+  <div class="axis-head"><span class="axis-tag">Eixo 1</span><h2>Captação e transporte de lipídios</h2></div>
+  <p class="lede">É o eixo mais bem ancorado na biologia do ovário: o omento é uma fonte externa de ácidos graxos, e a célula que chega lá precisa de maquinaria de captação. O ponto não trivial da sua hipótese é procurar essa maquinaria <em>já ligada no primário</em>, antes do contato com o adipócito.</p>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Gene</th><th>Função</th><th>Relevância para disseminação peritoneal</th><th>Evidência</th><th class="prio">Prio.</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">CD36<small>FAT / SR-B2</small></td><td>Receptor de captação de AG de cadeia longa e lipoproteínas oxidadas</td><td>Marca células iniciadoras de metástase; sustenta captação seletiva de MUFA durante o descolamento da matriz — exatamente o estado da célula que flutua na ascite</td><td class="ev">Carcinoma oral/melanoma (Nature 2016); pan-tumoral, <em>matrix detachment</em> (Cell Metab 2023); ovário cisplatina-resistente</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">FABP4<small>aP2</small></td><td>Chaperona intracelular de AG; ponte adipócito→tumor</td><td>Induzido por adipócitos em células de OC; promove metástase omental <em>e</em> resistência à carboplatina; ácido oleico entra por essa via</td><td class="ev">Ovário (Cancer Res 2020; Nat Med 2011); ovário cisplatina-resistente (2026)</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">SCARB1<small>SR-B1</small></td><td>Receptor de HDL/fosfolipídios</td><td>Achado de 2025: células NK na ascite superexpressam SR-B1, captam fosfolipídios (PC 36:1) e perdem citotoxicidade. Liga metabolismo lipídico a escape imune no peritônio</td><td class="ev">Ovário, ascite (Sci Immunol 2025)</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">FABP5</td><td>Chaperona de AG acoplada a PPARδ</td><td>Rota alternativa de sinalização lipídica quando FABP4 é baixo; associada a EMT e agressividade</td><td class="ev">Próstata, HCC, mama</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">APOE</td><td>Apolipoproteína; tráfego de colesterol</td><td>Marcador central de macrófagos associados a lipídios (LAM) — ver Eixo 8. No tumor, sustenta nicho imunossupressor</td><td class="ev">Pan-tumoral (scRNA-seq); glioma, fígado</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">SLC27A2<small>FATP2</small></td><td>Transportador/acil-CoA sintetase de AG</td><td>Inibição de FATP remodela lipídios do microambiente e sensibiliza ovário e mama a terapia</td><td class="ev">Ovário/mama (Front Immunol 2023)</td><td class="prio"><span class="chip x">X</span></td></tr>
+      <tr><td class="gene">LDLR · PCSK9</td><td>Captação de colesterol via LDL</td><td>Rota de colesterol exógeno; PCSK9 também modula apresentação de MHC-I</td><td class="ev">Pan-tumoral; imunoterapia</td><td class="prio"><span class="chip x">X</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="tnote">Nota prática: <code>FABP4</code> e <code>CD36</code> são altamente expressos em adipócitos, endotélio e macrófagos. Sem deconvolução ou resolução celular, um "sinal alto" pode ser estroma, não tumor. Esse é o argumento mais forte para incluir o Eixo 8 no mesmo painel.</p>
+</section>
+
+<section>
+  <div class="axis-head"><span class="axis-tag">Eixo 2</span><h2>Lipogênese <em>de novo</em> e desaturação</h2></div>
+  <p class="lede">A alternativa metabólica à captação: sintetizar em vez de importar. No primário — longe do omento — é plausível que esse seja o eixo dominante, e a razão captação/síntese pode ser em si um preditor. Vale calcular <code>CD36+FABP4</code> vs <code>FASN+SCD+ACACA</code> como escore por região.</p>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Gene</th><th>Função</th><th>Relevância para disseminação peritoneal</th><th>Evidência</th><th class="prio">Prio.</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">SCD<small>"SCD1" — desaturase Δ9</small></td><td>Converte SFA em MUFA (palmitato→palmitoleato)</td><td>Marcador metabólico de células-tronco de câncer de ovário; protege contra ferroptose. Sustenta stemness via NF-κB. Alvo terapêutico com inibidores em desenvolvimento</td><td class="ev">Ovário (Cell Stem Cell 2016; Cancer Res 2019; 2024)</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">FASN</td><td>Ácido graxo sintase — palmitato de novo</td><td>Driver de metástase em ovário; FASN tumoral bloqueia imunidade antitumoral ao perturbar células dendríticas infiltrantes</td><td class="ev">Ovário (Front Immunol 2018; revisão 2024)</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">SREBF1<small>SREBP-1</small></td><td>Fator de transcrição mestre da lipogênese</td><td>Integra o eixo inteiro num único read-out. Em próstata, reprogramação por SREBF1 confere resistência a ferroptose; em pâncreas e HCC associa-se a pior prognóstico</td><td class="ev">Próstata (Cell Death Discov 2025); pâncreas; HCC (Cancer Metastasis Rev 2023)</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">ACACA<small>ACC1</small></td><td>Passo limitante: acetil-CoA → malonil-CoA</td><td>Nó de controle entre síntese e oxidação (malonil-CoA inibe CPT1A). Fecha o circuito com o seu marcador CPT1A</td><td class="ev">Pan-tumoral; mama, pulmão</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">ACLY</td><td>Gera acetil-CoA citosólico</td><td>Conecta glicólise a lipogênese; também substrato para acetilação de histonas (elo metabolismo–epigenética)</td><td class="ev">Pan-tumoral</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">ELOVL5 · ELOVL6</td><td>Elongases de AG</td><td>ELOVL5 é elongase crítica e alvo terapêutico em próstata; define composição de PUFA que decide sensibilidade a ferroptose</td><td class="ev">Próstata (Cancer Res 2021)</td><td class="prio"><span class="chip x">X</span></td></tr>
+      <tr><td class="gene">ACSS2</td><td>Acetato → acetil-CoA</td><td>Rota de resgate sob hipóxia/privação de nutrientes; relevante em regiões centrais do tumor</td><td class="ev">Glioma, mama</td><td class="prio"><span class="chip x">X</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <div class="axis-head"><span class="axis-tag">Eixo 3</span><h2>Armazenamento: gotículas lipídicas</h2></div>
+  <p class="lede">Aqui está a correção mais importante ao seu painel original. <strong>DGAT2 sozinho é uma escolha discutível</strong> — na maior parte da literatura oncológica quem carrega o fenótipo é <strong>DGAT1</strong>, inclusive em ovário. As duas isoformas não são redundantes: DGAT1 lida preferencialmente com AG exógenos (o cenário do nicho omental), DGAT2 com AG sintetizados de novo. Manter as duas é justamente o que permite testar de onde vem o lipídio.</p>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Gene</th><th>Função</th><th>Relevância para disseminação peritoneal</th><th>Evidência</th><th class="prio">Prio.</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">DGAT1</td><td>Esterificação de AG <em>exógenos</em> em triglicerídeos</td><td>Expressão associada a progressão e pior prognóstico em câncer de ovário; protege contra lipotoxicidade. Em glioblastoma, inibir DGAT1 força catabolismo lipídico e estresse oxidativo letal</td><td class="ev">Ovário; GBM (Cell Metab 2020); revisão DGAT1/2 (J Transl Med 2024)</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">DGAT2</td><td>Esterificação de AG de <em>síntese de novo</em></td><td>Seu marcador original — mantenha, mas interprete em par com DGAT1 (a razão entre os dois indica a origem do lipídio armazenado)</td><td class="ev">Revisão comparativa (J Transl Med 2024)</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">PLIN2<small>ADRP</small></td><td>Perilipina da superfície da gotícula lipídica</td><td>Leitura direta de gotícula lipídica no tecido. Marca estados adipocíticos prematuros no omento metastático de ovário; em carcinoma oral, acúmulo dependente de PLIN2 promove metástase via EMT</td><td class="ev">Ovário/omento (Nat Commun 2025); OSCC (Cell Death Discov 2025)</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">HILPDA<small>HIG2</small></td><td>Gotícula lipídica induzida por hipóxia; inibe ATGL</td><td>Acopla o gradiente de hipóxia ao acúmulo de gotículas — ótimo para transcriptoma espacial, porque o gradiente é geograficamente interpretável. Prognóstico e infiltração de macrófagos em pan-câncer</td><td class="ev">Pan-câncer (Front Oncol 2021); ccRCC (PNAS 2024)</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">PNPLA2<small>ATGL</small></td><td>Lipólise da gotícula — libera AG para β-oxidação</td><td>Fecha o ciclo estoque→consumo junto com CPT1A. Sem ele, "gotícula alta" é ambíguo (acúmulo passivo vs turnover ativo)</td><td class="ev">Pan-tumoral; nicho pré-metastático (Cell Death Dis 2020)</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">SOAT1<small>ACAT1</small></td><td>Esterificação de colesterol</td><td>Induz EMT via metabolismo de colesterol em HCC; ésteres de colesterol acumulam em tumores agressivos</td><td class="ev">HCC (Cell Death Dis 2024); ccRCC (Sci Rep 2025)</td><td class="prio"><span class="chip e">E</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <div class="axis-head"><span class="axis-tag">Eixo 4</span><h2>β-oxidação e destino mitocondrial</h2></div>
+  <p class="lede">CPT1A é a sua melhor aposta isolada — é o marcador com mais publicações recentes ligando lipídio a exatamente os fenótipos que precedem disseminação: resistência à anoikis, EMT, stemness e escape da citólise imune.</p>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Gene</th><th>Função</th><th>Relevância para disseminação peritoneal</th><th>Evidência</th><th class="prio">Prio.</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">CPT1A</td><td>Entrada de acil-CoA na mitocôndria (passo limitante da FAO)</td><td>Quatro linhas convergentes em ovário: resistência à anoikis via ASS1/AMPK, promoção de EMT, manutenção de stemness via succinilação de MFF, e resistência à citólise mediada por linfócitos. Resistência à anoikis é o requisito mecânico da disseminação transcelômica</td><td class="ev">Ovário (FEBS J 2025; Commun Biol 2025; 2024); CRC (Oncogene 2018); PNAS 2023</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">PPARA</td><td>Fator de transcrição do programa de oxidação lipídica</td><td>Sustenta metabolismo mitocondrial de células-tronco de câncer de ovário; regulador upstream de CPT1A e ACOX1</td><td class="ev">Ovário, OCSC (IJMS 2024)</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">PPARG</td><td>Fator de transcrição adipogênico/lipídico</td><td>Define o programa adipocítico do nicho e a polarização de macrófagos; útil para caracterizar o compartimento estromal</td><td class="ev">Revisão PPARs em câncer (2023)</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">CPT1B · ACOX1 · PDK4</td><td>FAO muscular/peroxissomal; switch glicose→lipídio</td><td>Refinam o fenótipo oxidativo; PDK4 marca a troca de substrato associada a resistência à platina</td><td class="ev">Resistência à platina (Nat Commun 2022)</td><td class="prio"><span class="chip x">X</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <div class="axis-head"><span class="axis-tag">Eixo 5</span><h2>Remodelamento de fosfolipídios e ferroptose</h2></div>
+  <p class="lede">O eixo com mais tração na literatura de 2024–2026 e o que está totalmente ausente do seu painel atual. A composição da membrana — quanto PUFA vs MUFA — decide se a célula sobrevive ao estresse oxidativo do descolamento e da ascite. É plausivelmente <em>o</em> gargalo entre "célula solta do primário" e "implante viável no peritônio".</p>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Gene</th><th>Função</th><th>Relevância para disseminação peritoneal</th><th>Evidência</th><th class="prio">Prio.</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">ACSL4</td><td>Ativa PUFA para incorporação em fosfolipídios de membrana</td><td>Determinante pró-ferroptótico canônico. Baixo ACSL4 + alto SCD = membrana resistente à peroxidação = célula apta a sobreviver solta. A razão ACSL4/SCD é um read-out mais informativo que qualquer um dos dois isolado</td><td class="ev">Pan-tumoral (Trends Endocrinol Metab 2024; Front Pharmacol 2025); HCC; TNBC</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">LPCAT1</td><td>Remodelamento de fosfolipídios (ciclo de Lands) — insere cadeias saturadas</td><td>Remodelamento por LPCAT1 promove evasão de ferroptose e crescimento tumoral; em endométrio, aumenta stemness e metástase via TGF-β/Smad2/3. Contrapeso direto de ACSL4</td><td class="ev">Pan-tumoral (Nat Cell Biol 2024); endométrio (2022); TNBC (2024)</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">GPX4</td><td>Detoxifica hidroperóxidos lipídicos</td><td>Executor da resistência à ferroptose; ligado a quimiorresistência a taxano em ovário</td><td class="ev">Ovário (2023; J Ovarian Res 2026)</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">SLC7A11<small>xCT</small></td><td>Antiporter cistina/glutamato — supre GSH</td><td>Braço upstream do mesmo eixo; frequentemente amplificado em tumores agressivos</td><td class="ev">Pan-tumoral</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">PTGS2<small>COX-2</small> · PLA2G4A</td><td>Liberação de araquidonato e síntese de PGE2</td><td>PGE2 medeia invasão independente de E-caderina em ovário e polariza macrófagos peritoneais para fenótipo pró-metastático. Sinalização lipídica que atravessa a interface tumor–mesotélio</td><td class="ev">Ovário (Endocr Relat Cancer 2014; Cancers 2022)</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">AIFM2<small>FSP1</small></td><td>Via de resistência à ferroptose independente de GPX4</td><td>Explica casos em que GPX4 não prediz; ainda pouco explorado em ovário</td><td class="ev">Pan-tumoral</td><td class="prio"><span class="chip x">X</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <div class="axis-head"><span class="axis-tag">Eixo 6</span><h2>Sinalização lipídica extracelular: o eixo da ascite</h2></div>
+  <p class="lede">Lipídio como mensageiro, não como combustível. É o eixo mais específico do câncer de ovário e o que mais diretamente conversa com "disseminação peritoneal" — LPA é historicamente o fator ascítico mais estudado da doença.</p>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Gene</th><th>Função</th><th>Relevância para disseminação peritoneal</th><th>Evidência</th><th class="prio">Prio.</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">ENPP2<small>autotaxina</small></td><td>Produz LPA a partir de lisofosfatidilcolina</td><td>Autotaxina ascítica é alvo prognóstico, diagnóstico e terapêutico em câncer epitelial de ovário; em pâncreas, autotaxina na ascite promove disseminação peritoneal diretamente</td><td class="ev">Ovário (Br J Cancer 2023); pâncreas (2020); melanoma</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">LPAR1 · LPAR3</td><td>Receptores de LPA acoplados a proteína G</td><td>Rede de sinalização de LPA governa dinâmica actomiosínica, migração e entose em células de ovário — os movimentos exigidos para atravessar o mesotélio</td><td class="ev">Ovário (Theranostics 2023)</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">PLPP1<small>LPP1</small></td><td>Degrada LPA extracelular (freio do eixo)</td><td>Camundongos sem LPP1 têm crescimento peritoneal reduzido de tumor ovariano — a perda do freio importa tanto quanto o ganho do sinal</td><td class="ev">Ovário, modelo murino (PLOS One 2015)</td><td class="prio"><span class="chip x">X</span></td></tr>
+      <tr><td class="gene">SPHK1 · S1PR1</td><td>Eixo esfingosina-1-fosfato</td><td>Assinaturas de metabolismo de esfingolipídios têm sido associadas a prognóstico e microambiente imune em ovário</td><td class="ev">Ovário, assinatura (2025)</td><td class="prio"><span class="chip x">X</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <div class="axis-head"><span class="axis-tag">Eixo 7</span><h2>Colesterol e via do mevalonato</h2></div>
+  <p class="lede">Menos explorado no seu recorte, mas com um gancho translacional forte (estatinas) e um achado específico de ovário: colesterol da ascite ativa LXR e induz quimiorresistência.</p>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Gene</th><th>Função</th><th>Relevância para disseminação peritoneal</th><th>Evidência</th><th class="prio">Prio.</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">ABCA1</td><td>Efluxo de colesterol para apoA-I</td><td>Supressão prejudica crescimento e migração de câncer epitelial de ovário; em células mieloides, sustenta funções antitumorais — ou seja, o efeito depende do compartimento, que é exatamente o que o espacial resolve</td><td class="ev">Ovário (Cancers 2022); mieloide (Sci Adv 2025)</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">NR1H3 · NR1H2<small>LXRα/β</small></td><td>Sensores nucleares de oxisterol</td><td>Colesterol da ascite maligna ativa LXRα/β e promove quimiorresistência em ovário</td><td class="ev">Ovário, ascite (2018)</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">HMGCR · SQLE</td><td>Via do mevalonato; síntese de colesterol e prenilação</td><td>Inibição do mevalonato tem efeito antitumoral em ovário; células mesenquimais sem coesão por E-caderina são particularmente sensíveis a estatina — perfil da célula que se solta</td><td class="ev">Ovário (BMC Cancer 2020; Sci Rep 2017); revisão HMGCR (Front Oncol 2025)</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">SREBF2 · INSIG1</td><td>Braço colesterolgênico e seu sensor</td><td>Contraparte de SREBF1; permite separar programa de AG do programa de esterol</td><td class="ev">Pan-tumoral</td><td class="prio"><span class="chip x">X</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <div class="axis-head"><span class="axis-tag">Eixo 8</span><h2>Contexto celular — o que torna o dado espacial interpretável</h2></div>
+  <p class="lede">Esta é a parte que a maioria dos painéis dirigidos esquece e que depois inviabiliza a análise. Todos os genes acima são expressos por mais de um tipo celular. Sem âncoras de identidade celular no mesmo experimento, "SCD alto nesta região" pode ser tumor, fibroblasto ou macrófago. Em Visium isso vem de graça (basta deconvolver); em Xenium/CosMx precisa ser reservado no painel desde o desenho.</p>
+
+  <h3>Complemento na interface adipócito–tumor <span class="chip n" style="vertical-align:middle;margin-left:6px;">N</span></h3>
+  <p>Achado de 2025 que vale destaque no seu projeto: a transferência de lipídios do adipócito para a célula tumoral induz <code>C3</code> e <code>C5</code> via resposta integrada ao estresse (ATF4); <code>C3</code> é significativamente mais expresso em implantes omentais do que no tumor primário, o knockdown reduz massa tumoral in vivo, e a expressão combinada da via associa-se a pior sobrevida global em HGSOC. Genes: <code>C3</code>, <code>C5</code>, <code>C3AR1</code>, <code>CFH</code>, <code>CFHR1</code>. É o ponto onde o seu "CD35" inicial encontra literatura real — só que pela via do complemento solúvel, não do receptor CR1.</p>
+
+  <h3>Estroma e nicho</h3>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Compartimento</th><th>Genes-âncora</th><th>Por que incluir</th><th class="prio">Prio.</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">CAF<small>fibroblasto associado ao câncer</small></td><td class="ev"><code>NNMT</code>, <code>POSTN</code>, <code>FN1</code>, <code>COL11A1</code>, <code>ACTA2</code></td><td>NNMT é regulador metabólico mestre dos CAFs no omento ovariano (Nature 2019) — metilação/SAM conecta metabolismo a reprogramação estromal. POSTN/FN1/COL11A1 marcam o programa desmoplásico da metástase omental</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">Adipócito / pré-adipócito</td><td class="ev"><code>ADIPOQ</code>, <code>PLIN1</code>, <code>LEP</code>, <code>CFD</code>, <code>LPL</code>, <code>CD34</code></td><td>Pré-adipócitos omentais estimulam remodelamento de matriz e sinalização IGF que sustenta a metástase; no tumor primário, servem de controle negativo espacial</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">Macrófago lipídico<small>LAM/TAM</small></td><td class="ev"><code>TREM2</code>, <code>APOE</code>, <code>SPP1</code>, <code>GPNMB</code>, <code>CD68</code>, <code>MRC1</code></td><td>LAM TREM2⁺APOE⁺ predizem pior prognóstico e são alvo imunoterapêutico emergente; macrófagos residentes do omento promovem disseminação ovariana</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">Mesotélio / CAMC</td><td class="ev"><code>MSLN</code>, <code>UPK3B</code>, <code>KRT19</code>, <code>WT1</code>, <code>CXCL1</code>, <code>CXCL2</code></td><td>Células mesoteliais associadas ao câncer adquirem fenótipo inflamatório e hipóxico e promovem invasão peritoneal via formação de esferoides</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">Tumor HGSOC</td><td class="ev"><code>PAX8</code>, <code>WT1</code>, <code>MUC16</code>, <code>EPCAM</code>, <code>TP53</code></td><td>Âncora de identidade epitelial — sem ela, nenhuma atribuição de sinal lipídico ao tumor é defensável</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">Linfócito / NK</td><td class="ev"><code>CD8A</code>, <code>NKG7</code>, <code>GZMB</code>, <code>PDCD1</code>, <code>SCARB1</code></td><td>Permite testar a hipótese imunometabólica: regiões lipid-high com exclusão ou disfunção de NK/CD8</td><td class="prio"><span class="chip e">E</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+<section>
+  <div class="axis-head"><h2>Bloco B — Metabolismo glicolítico</h2></div>
+  <p class="lede">O efeito Warburg — glicólise aeróbia mesmo com oxigênio disponível — é a outra metade da moeda metabólica do HGSOC, e é o que falta para operacionalizar a primeira razão da seção "Cinco decisões" (<code>lipídico-oxidativo ÷ glicolítico</code>): este bloco fornece o denominador. A lógica de camadas (Núcleo/Expansão/Exploratório) e a leitura por plataforma (Visium, Xenium/CosMx, bulk isolado) da introdução valem exatamente do mesmo jeito aqui.</p>
+</section>
+
+<section>
+  <div class="axis-head"><span class="axis-tag">Eixo 9</span><h2>Captação e glicólise central</h2></div>
+  <p class="lede">O núcleo duro do efeito Warburg em HGSOC: os quatro genes com evidência mais direta e mais replicada de expressão elevada em tumores avançados/alto grau, cada um já validado como fator prognóstico isolado na doença.</p>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Gene</th><th>Função</th><th>Relevância para disseminação peritoneal</th><th>Evidência</th><th class="prio">Prio.</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">SLC2A1<small>GLUT1</small></td><td>Transportador de glicose limitante da captação; upregulado por MYC e PI3K/AKT</td><td>Correlaciona com proliferação, angiogênese e sobrevida; associado à capacidade de prever citorredução ótima — ou seja, já é usado clinicamente como proxy de doença mais difícil de ressecar</td><td class="ev">Gynecol Oncol 2011; Ovarian Cancer Relies on GLUT1 (PMC6356953)</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">HK2</td><td>Primeira enzima limitante da glicólise aeróbia; liga-se ao VDAC1 mitocondrial</td><td>Altamente expressa em HGSOC avançado; fator prognóstico independente; associada a resistência à cisplatina — conecta diretamente ao eixo de sensibilidade à platina que você já vinha considerando como discriminador</td><td class="ev">Expression of hexokinase 2 in epithelial ovarian tumors — PubMed 25423696</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">PFKFB3</td><td>Produz frutose-2,6-BP, o ativador alostérico mais potente de PFK1</td><td>Amplamente superexpressa em CO; associada a pior prognóstico e quimiorresistência</td><td class="ev">The emerging role of glycolysis and immune evasion in ovarian cancer — Cancer Cell Int 2025</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">PKM2</td><td>Última enzima limitante; forma dimérica transloca ao núcleo e age como quinase</td><td>Expressão alta correlaciona com pior prognóstico; promove proliferação, invasão e quimiorresistência</td><td class="ev">Pyruvate kinase M2 is a poor prognostic marker — PLOS ONE 0182166</td><td class="prio"><span class="chip n">N</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <div class="axis-head"><span class="axis-tag">Eixo 10</span><h2>Hipóxia, lactato e destino mitocondrial</h2></div>
+  <p class="lede">É o eixo com a ligação mecanística mais direta ao mesmo problema biológico do Bloco A: como a célula sobrevive solta na ascite, hipóxica, antes de implantar. Fenótipos de célula-tronco de esferoide redirecionam glicose para glicólise anaeróbia e via das pentoses — a mesma manobra que sustenta lipogênese <em>de novo</em> no Eixo 2 — às custas do ciclo de Krebs, conferindo resistência a apoptose e a quimioterapia.</p>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Gene</th><th>Função</th><th>Relevância para disseminação peritoneal</th><th>Evidência</th><th class="prio">Prio.</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">HIF1A</td><td>Fator de transcrição mestre da resposta hipóxica; ativa enzimas glicolíticas e MCT4</td><td>Induz CX3CR1 e promove EMT em CO; sustenta o fenótipo hipóxia-resistente de esferoide (glicólise anaeróbia + via das pentoses para NADPH/lipogênese, TCA reduzido, resistência a apoptose) — perfil plausível para a célula que sobrevive à ascite antes de colonizar o peritônio</td><td class="ev">HIF1A induces CX3CR1... EMT — PubMed 31077234; Hypoxia-resistant metabolism of spheroid stem-like cells — PLOS ONE 0084941</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">LDHA</td><td>Converte piruvato em lactato</td><td>Acidifica o microambiente <em>e</em> reprograma macrófagos associados ao tumor para fenótipo pró-tumoral via lactato — ponte direta com o Eixo 8 (LAM/TAM) e com exaustão de linfócitos T por lactilação</td><td class="ev">Lactate-mediated reprogramming of TAMs — Front Immunol 2025; Lactate and lactylation in T-cell tumor immunity — PMC11674224</td><td class="prio"><span class="chip n">N</span></td></tr>
+      <tr><td class="gene">SLC16A3<small>MCT4</small></td><td>Exportador de lactato; alvo transcricional direto de HIF1A</td><td>Mantém a glicólise viável exportando o produto ácido; associado a pior prognóstico e imunossupressão em análise pan-câncer e em câncer de ovário especificamente; alvo terapêutico emergente</td><td class="ev">SLC16A3 (MCT4) pan-cancer analysis — ScienceDirect 2025; Monocarboxylate transporters in ovarian cancer — PubMed 37934721</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">PDK1<small>PDHK1</small></td><td>Inibe o complexo piruvato desidrogenase, desviando piruvato da mitocôndria</td><td>Upregulado por MYC; sustenta glicólise aeróbia mesmo com O2 disponível; bloqueio sensibiliza células ao tratamento</td><td class="ev">The emerging role of glycolysis and immune evasion in ovarian cancer — Cancer Cell Int 2025</td><td class="prio"><span class="chip e">E</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <div class="axis-head"><span class="axis-tag">Eixo 11</span><h2>Interface glicólise-imunidade e freio metabólico</h2></div>
+  <p class="lede">Dois genes que servem de contraponto ao resto do bloco — úteis justamente porque vão na direção oposta e ajudam a interpretar o escore, não só a empilhar mais um marcador de agressividade.</p>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Gene</th><th>Função</th><th>Relevância para disseminação peritoneal</th><th>Evidência</th><th class="prio">Prio.</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">FBP1</td><td>Enzima gliconeogênica que se opõe à glicólise — funciona como supressor metabólico</td><td>Associado a prognóstico favorável e a maior escore imune em CO; bom marcador de "freio" para calibrar o escore glicolítico do Eixo 9-10</td><td class="ev">Establishment of glycolysis-related prognostic signature — J Transl Med 2021</td><td class="prio"><span class="chip e">E</span></td></tr>
+      <tr><td class="gene">CXCR4</td><td>Receptor de quimiocina na interface entre via glicolítica e função imune</td><td>Reportado como favorável na assinatura-fonte; útil como gene de ponte metabolismo-imunidade, paralelo ao papel de SCARB1 no Bloco A</td><td class="ev">Establishment of glycolysis-related prognostic signature — J Transl Med 2021</td><td class="prio"><span class="chip x">X</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="tnote">Como no Bloco A, considere uma razão em vez de genes isolados: <code>HK2+PFKFB3+PKM2+LDHA</code> ÷ <code>FBP1</code> resume "quão comprometida com Warburg" está a amostra, de forma mais robusta a variação de profundidade entre bibliotecas do que qualquer gene sozinho.</p>
+</section>
+
+
+<section>
+  <div class="axis-head"><h2>Cinco decisões de desenho que valem mais que a lista de genes</h2></div>
+  <ol>
+    <li><strong>Pense em razões, não em níveis absolutos.</strong> Quatro pares carregam mais informação que os genes isolados: captação vs síntese (<code>CD36+FABP4</code> ÷ <code>FASN+SCD+ACACA</code>), estoque vs oxidação (<code>DGAT1+PLIN2</code> ÷ <code>CPT1A+PNPLA2</code>), vulnerabilidade vs resistência à ferroptose (<code>ACSL4</code> ÷ <code>SCD+LPCAT1+GPX4</code>), e agora, com o Bloco B, Warburg vs freio glicolítico (<code>HK2+PFKFB3+PKM2+LDHA</code> ÷ <code>FBP1</code>) — este último é também o denominador do balanço lipídico-oxidativo ÷ glicolítico citado na Fase 2. São escores robustos a variação de profundidade entre lâminas.</li>
+    <li><strong>A geografia é a sua variável independente.</strong> Se a hipótese é que o primário prediz disseminação, a comparação não é "tumor vs estroma" e sim <em>borda invasiva / superfície serosa capsular vs núcleo tumoral</em>. Considere calcular distância à superfície como covariável contínua — é o análogo espacial do "primeiro passo" da disseminação transcelômica.</li>
+    <li><strong>Ancore o desfecho antes de coletar.</strong> Tumor primário sem PCI, resíduo cirúrgico (R0 vs R1/R2), estadiamento peritoneal e intervalo livre de platina não vira predição de nada. Idealmente, casos pareados primário–implante omental do mesmo paciente para poder afirmar que o programa é <em>anterior</em>, não induzido.</li>
+    <li><strong>RNA não é lipídio.</strong> A crítica mais previsível de banca. Vale prever validação ortogonal: IHC/IF para 2–3 alvos (SCD, CPT1A, PLIN2 e coloração de gotícula com Oil Red O ou BODIPY em congelado) e, se houver acesso, MALDI imaging mass spectrometry na lâmina adjacente para medir a espécie lipídica de fato.</li>
+    <li><strong>Cheque a detectabilidade antes de fechar o painel.</strong> <code>LPAR3</code>, <code>PLPP1</code>, <code>AIFM2</code> e receptores em geral têm expressão baixa; em Visium podem ficar abaixo do ruído por spot. Benchmarks recentes de plataformas em FFPE mostram diferenças relevantes de sensibilidade e contaminação de sinal entre células vizinhas (relevante para <code>FABP4</code>/<code>CD36</code>, altos no estroma adjacente).</li>
+  </ol>
+</section>
+
+<section>
+  <div class="axis-head"><h2>Estratificação da coorte</h2></div>
+  <p class="lede">Em uma coorte FIGO IIIC/IV, <strong>"invasão peritoneal" não é um critério de estratificação — é um critério de inclusão.</strong> Praticamente todas as pacientes têm acometimento peritoneal, e um grupo com variância quase nula não gera contraste. O que precisa variar é <em>como</em> e <em>quanto</em>, não <em>se</em>.</p>
+
+  <h3>Critérios que efetivamente variam dentro da doença avançada</h3>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Critério</th><th>Natureza</th><th>Por que serve</th><th>Ressalva</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">Padrão miliar<small>vs não-miliar</small></td><td>Binário, patológico/cirúrgico</td><td>Melhor encaixe conceitual: os dois padrões têm transcriptomas distintos e origens putativas diferentes (tuba vs ovário), com valor prognóstico independente. É literalmente "como o peritônio foi invadido"</td><td class="ev">Exige descrição cirúrgica padronizada — verifique se o seu banco tem</td></tr>
+      <tr><td class="gene">PCI · Fagotti</td><td>Ordinal / contínuo</td><td>Carga peritoneal sem dicotomizar; preserva o eixo da hipótese</td><td class="ev">Variabilidade entre cirurgiões; registre quem pontuou</td></tr>
+      <tr><td class="gene">Volume de ascite</td><td>Contínuo</td><td>Subestimado e o mais coerente com o tema: há relação dose-resposta entre volume e sobrevida, e a ascite é <em>o</em> compartimento lipídico da doença</td><td class="ev">Medida pré-operatória vs intraoperatória diferem — padronize</td></tr>
+      <tr><td class="gene">FIGO IIIC vs IV</td><td>Binário</td><td>Separa disseminação transcelômica pura de rota hematogênica/pleural — biologias distintas</td><td class="ev">IV é heterogêneo (IVA pleural vs IVB parenquimatoso)</td></tr>
+      <tr><td class="gene">Resíduo cirúrgico<small>R0 vs R1/R2</small></td><td>Binário</td><td>Fator prognóstico mais forte da doença</td><td class="ev">Confundido por agressividade cirúrgica e centro — use como covariável, não como agrupamento principal</td></tr>
+      <tr><td class="gene">CRS<small>chemotherapy response score</small></td><td>Ordinal (3 níveis)</td><td>Se a coorte for pós-NACT, é um estratificador validado por meta-análise de dados individuais</td><td class="ev">Só existe em pacientes neoadjuvadas</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout" style="margin-top:26px;">
+    <h3>Três confundidores que precisam ser registrados de qualquer forma</h3>
+    <p><strong>Quimioterapia neoadjuvante.</strong> O maior risco do projeto. Se as amostras de "tumor primário" vierem de citorredução de intervalo, o transcriptoma está alterado pelo tratamento — e metabolismo lipídico é particularmente sensível. NACT deve ser critério de exclusão ou eixo de estratificação primário, nunca "mais uma covariável".</p>
+    <p><strong>Status BRCA/HRD.</strong> Biologia e desfecho diferentes; sem isso, qualquer diferença metabólica pode ser HRD disfarçado.</p>
+    <p><strong>Fração estromal e pureza tumoral.</strong> <code>FABP4</code>, <code>CD36</code>, <code>PLIN2</code>, <code>APOE</code> e <code>LPL</code> são altos em adipócito, endotélio e macrófago. Os subtipos moleculares de HGSOC já foram demonstrados como dirigidos por composição celular. Sem ajuste, "escore lipídico alto" pode significar apenas "mais gordura na amostra".</p>
+  </div>
+</section>
+
+<section>
+  <div class="axis-head"><h2>Plano B — desenho em bulk</h2></div>
+  <p class="lede">Bulk não é "espacial com menos resolução": ele apaga a hipótese original, porque moer o fragmento inteiro num tubo destrói justamente a informação de sub-região. O que sobrevive é uma pergunta mais fraca — <em>o programa lipídico global do primário associa-se à carga peritoneal e ao desfecho?</em> — mas há duas formas de recuperar contraste intra-paciente antes de aceitar a perda.</p>
+
+  <h3>Primeiro: tente não perder o pareamento</h3>
+  <ul>
+    <li><strong>Macrodissecção guiada por patologista.</strong> Duas bibliotecas por paciente — região superficial/subserosa vs profunda do mesmo bloco. Grosseiro, mas preserva a lógica da hipótese e o teste vira pareado, o que compensa muito o n pequeno. LCM faz o mesmo com mais pureza, e há protocolos validados de RNA de FFPE microdissecado para NGS.</li>
+    <li><strong>Primário ↔ implante omental da mesma paciente.</strong> Bulk mata o contraste intra-<em>tumor</em>, não o intra-<em>paciente</em>. Responde diretamente à pergunta que a literatura de complemento deixou aberta: C3 é mais alto no implante — mas o primário já tinha?</li>
+  </ul>
+  <p>Qualquer um dos dois é preferível a um desenho transversal com o dobro de pacientes.</p>
+
+  <h3>Se for mesmo uma biblioteca por paciente</h3>
+  <ol>
+    <li><strong>Deconvolução e pureza antes de qualquer análise.</strong> Estime fração celular (BayesPrism ou CIBERSORTx, com referência de scRNA-seq de HGSOC) e pureza tumoral (ESTIMATE ou equivalente). Inclua ambas como covariáveis em <em>todo</em> modelo, e reporte o escore lipídico antes e depois do ajuste. Se ele desaparece com ajuste, você descobriu isso antes da banca.</li>
+    <li><strong>Construa escores modulares, não genes isolados.</strong> ssGSEA/GSVA sobre os eixos deste painel, mais as três razões (captação÷síntese, estoque÷oxidação, ACSL4÷resistência à ferroptose). Escores são robustos a variação de profundidade entre bibliotecas; genes isolados não.</li>
+    <li><strong>Derive nos dados públicos, valide na sua coorte.</strong> Existem centenas de HGSOC avançados com transcriptoma bulk e anotação clínica em domínio público (TCGA-OV, AOCS, e os pacotes <code>curatedOvarianData</code> / <code>MetaGxOvarian</code> no Bioconductor, já harmonizados). Congele genes, pesos e ponto de corte lá — e só então teste na sua coorte. Isso converte "n=40 procurando associação" em "assinatura derivada em n≈500, validada independentemente".</li>
+    <li><strong>Desfecho contínuo.</strong> Tempo até progressão peritoneal, não grupos. Dicotomizar joga fora informação exatamente onde não há folga.</li>
+    <li><strong>Teste de valor incremental.</strong> Compare um modelo clínico basal (estádio, resíduo, HRD, idade) com o mesmo modelo + escore lipídico, por Δ C-index ou teste de razão de verossimilhança. É o único resultado que separa uma tese defensável de mais uma assinatura publicada.</li>
+  </ol>
+
+  <h3>Checagem de realidade sobre tamanho</h3>
+  <p>Para comparar dois grupos num escore contínuo com efeito grande (d≈0,8) são necessários ~26 por grupo para 80% de poder; com efeito moderado (d≈0,5), ~64 por grupo. Em Cox, a regra prática é ~10 eventos por covariável — com pureza e fração estromal já ocupando duas, sobra pouco. Traduzindo: <strong>duas ou três hipóteses pré-especificadas</strong>, não uma varredura de 40 genes contra 5 variáveis clínicas.</p>
+</section>
+
+<section>
+  <div class="axis-head"><h2>Desenho com bulk + exoma + single-cell</h2></div>
+  <p class="lede">Sem transcriptoma espacial, mas com <strong>bulk RNA-seq, exoma e single-cell</strong> na mesma coorte, o projeto continua sendo um bom mestrado — e em alguns aspectos fica mais executável. O que você perde é <em>onde no tecido</em>; o que você ganha é <em>qual célula</em>. É uma troca aceitável, desde que a linguagem do projeto mude junto: sai "nicho espacial", entra "compartimento celular".</p>
+
+  <h3>O papel de cada dado</h3>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Dado</th><th>O que mede</th><th>O que responde bem</th><th>O que não responde</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">Bulk RNA-seq<small>muitas pacientes</small></td><td>Média da expressão de todas as células do fragmento, misturadas</td><td>Associação entre programa metabólico e desfecho clínico, com n suficiente para estatística</td><td class="ev">Qual célula expressa o quê — tudo vem misturado</td></tr>
+      <tr><td class="gene">scRNA-seq<small>poucas pacientes</small></td><td>Expressão célula a célula, com identidade de cada uma</td><td>Qual tipo celular carrega o programa lipídico e glicolítico</td><td class="ev">Estatística de nível-paciente — n pequeno demais</td></tr>
+      <tr><td class="gene">Exoma (WES)<small>DNA, não expressão</small></td><td>Mutações e alterações de número de cópias</td><td>Status HRD/BRCA, confirmação de TP53, estimativa de pureza tumoral</td><td class="ev">Atividade metabólica — DNA não diz o que está ligado</td></tr>
+      <tr><td class="gene">Espacial<small>futuro</small></td><td>Expressão preservando a posição no tecido</td><td>Onde no tecido, e gradiente até a superfície serosa</td><td class="ev">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="tnote">A ideia central: <strong>os três não são três estudos, são três papéis de um argumento só.</strong> O single-cell constrói a referência de tipos celulares; o exoma controla os confundidores; o bulk faz a estatística contra o desfecho. Escrever os objetivos nessa ordem já resolve metade da crítica de "por que tantas tecnologias?".</p>
+
+  <h3>Dois níveis de classificação — não confunda</h3>
+  <div class="tiers">
+    <div class="tier">
+      <span class="chip n">A · Classificação clínica</span>
+      <p>Define os grupos <strong>antes</strong> de olhar qualquer dado molecular: carga peritoneal (PCI ou limitada vs carcinomatose, com gap declarado), e o desfecho tempo-dependente (recorrência peritoneal após R0). É critério de entrada e desfecho.</p>
+    </div>
+    <div class="tier">
+      <span class="chip e">B · Classificação molecular</span>
+      <p>O escore metabólico é <strong>resultado</strong>, nunca critério de entrada. Reporte-o primeiro como variável contínua; só corte em grupos depois, e apenas para ilustrar.</p>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:20px;">
+    <h3>O erro mais comum nesse tipo de projeto</h3>
+    <p>Agrupar as pacientes por <em>clustering</em> molecular ("encontramos 3 subtipos metabólicos") com n modesto. Clusters em coortes pequenas são instáveis: mudam com o método de normalização, com a semente aleatória e com a retirada de duas amostras. Um <strong>escore contínuo pré-especificado</strong> tem mais poder estatístico, é reprodutível e sobrevive à revisão. Guarde o clustering para uma figura suplementar, se guardar.</p>
+  </div>
+
+  <h3>O pipeline, etapa por etapa</h3>
+  <ol>
+    <li><strong>Inventário do banco.</strong> Quantas pacientes têm cada dado — e, principalmente, <em>quantas têm os três</em>. A interseção é o seu n real. Levante junto: quimioterapia neoadjuvante (sim/não), sítio da amostra, resíduo cirúrgico, tempo de seguimento e data da recidiva. Sem isso, nenhuma análise adiante é interpretável.</li>
+    <li><strong>Single-cell: quem carrega o programa.</strong> Identifique os tipos celulares (tumor PAX8⁺/WT1⁺, fibroblasto, macrófago, linfócito T/NK, endotélio, mesotélio) e calcule os escores lipídico e glicolítico <em>dentro de cada tipo</em>. A pergunta é direta: o programa lipídico está na célula tumoral ou no macrófago? Se estiver no macrófago, isso não é um fracasso — é o achado, e muda a história do trabalho.</li>
+    <li><strong>Deconvolução do bulk.</strong> Use o seu próprio single-cell como referência (BayesPrism ou CIBERSORTx) para estimar a fração de cada tipo celular em cada amostra de bulk. Ter referência interna, da mesma doença e do mesmo laboratório, é uma vantagem real sobre quem usa atlas público. Depois disso, o escore metabólico pode ser calculado no compartimento tumoral, não na mistura.</li>
+    <li><strong>Exoma: confundidores e âncora clínica.</strong> Extraia status HRD (há testes de HRD validados a partir de exoma em câncer de ovário epitelial), confirmação de mutação em <code>TP53</code> — em HGSOC verdadeiro ela é praticamente universal, então um caso sem ela merece revisão diagnóstica — e pureza tumoral por número de cópias. Essas três variáveis entram como covariáveis, e o HRD ainda é clinicamente acionável por si só.</li>
+    <li><strong>Análise primária.</strong> Escore metabólico pré-especificado (balanço lipídico-oxidativo ÷ glicolítico, com escore de hipóxia ajustado) contra: carga peritoneal (transversal) e tempo até recorrência peritoneal (longitudinal). Ajustado por pureza, fração estromal/imune, HRD e neoadjuvância. Finalize com o teste de ganho incremental sobre o modelo clínico.</li>
+    <li><strong>Camada imune (exploratória).</strong> Com o single-cell: linfócitos T em tumores lipid-high estão mais exaustos? Macrófagos estão mais carregados de lipídio? Com o bulk deconvoluído: fração de CD8 e de macrófagos lipídicos versus escore metabólico. Declare como gerador de hipótese — transcriptoma não demonstra competição por nutrientes.</li>
+  </ol>
+
+  <h3>Glossário mínimo de imunologia tumoral</h3>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Termo</th><th>O que é, em linguagem direta</th><th>Genes que marcam</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">TIL</td><td>Linfócito que infiltrou o tumor. Em HGSOC, mais linfócitos T CD8⁺ dentro do epitélio tumoral associa-se consistentemente a melhor sobrevida, com relação dose-resposta</td><td class="ev"><code>CD3E</code>, <code>CD8A</code></td></tr>
+      <tr><td class="gene">Exaustão de células T</td><td>Célula T cronicamente estimulada que perde a capacidade de matar. Não é ausência de linfócito — é linfócito presente e desligado, o que é uma distinção importante para o seu argumento metabólico</td><td class="ev"><code>PDCD1</code>, <code>HAVCR2</code>, <code>LAG3</code>, <code>TOX</code></td></tr>
+      <tr><td class="gene">TAM</td><td>Macrófago associado ao tumor. A dicotomia "M1/M2" está superada; hoje se descrevem programas transcricionais</td><td class="ev"><code>CD68</code>, <code>MRC1</code></td></tr>
+      <tr><td class="gene">LAM</td><td>Macrófago associado a lipídios — subtipo carregado de gotículas lipídicas, geralmente imunossupressor. É o elo direto entre o seu tema e a imunologia</td><td class="ev"><code>TREM2</code>, <code>APOE</code>, <code>SPP1</code>, <code>GPNMB</code></td></tr>
+      <tr><td class="gene">Deconvolução</td><td>Estimar, a partir da mistura do bulk, que proporção veio de cada tipo celular — usando o single-cell como gabarito</td><td class="ev">—</td></tr>
+      <tr><td class="gene">Pureza tumoral</td><td>Que fração da amostra é de fato célula tumoral. Baixa pureza dilui qualquer sinal do tumor e infla sinal do estroma</td><td class="ev">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="tnote">Por que a camada imune interessa clinicamente: o HGSOC responde mal a inibidores de checkpoint imune, e a imunossupressão metabólica é uma das hipóteses para explicar isso. Ligar seu escore lipídico a exaustão de T e a macrófagos lipídicos conecta o trabalho a essa pergunta em aberto — como hipótese, não como demonstração.</p>
+</section>
+
+<section>
+  <div class="axis-head"><h2>Passo a passo: bulk + single-cell, grupos por PCI</h2></div>
+  <p class="lede">Roteiro operacional assumindo divisão das pacientes pelo Peritoneal Cancer Index. Cada passo diz <em>o que fazer</em>, <em>o que sai dali</em> e <em>qual é a armadilha</em>. As fases são sequenciais de propósito: a Fase 0 inteira acontece antes de você abrir qualquer arquivo de expressão.</p>
+
+  <h3>Fase 0 · Antes de abrir qualquer dado molecular</h3>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Passo</th><th>O que fazer</th><th>O que sai dali</th><th>Armadilha</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">1<small>Definir o PCI</small></td><td>Escolher <strong>uma</strong> fonte e usar só ela: descrição cirúrgica, laparoscopia ou imagem. O PCI soma 13 regiões abdominopélvicas, cada uma pontuada de 0 a 3 pelo tamanho da lesão, indo de 0 a 39</td><td class="ev">Um valor de PCI por paciente, com a fonte registrada</td><td class="ev">Misturar fontes. PCI de laparotomia, de laparoscopia e de tomografia não são a mesma medida e não podem entrar na mesma coluna</td></tr>
+      <tr><td class="gene">2<small>Cegar a pontuação</small></td><td>Quem pontua o PCI não pode saber nada dos dados moleculares. Idealmente dois avaliadores independentes num subconjunto, para medir concordância</td><td class="ev">Kappa ou CCI entre avaliadores — uma frase na seção de métodos que blinda o trabalho</td><td class="ev">Você mesma pontuar depois de já ter visto a expressão. É a crítica mais fácil de fazer e a mais difícil de responder</td></tr>
+      <tr><td class="gene">3<small>Escolher o corte</small></td><td>Na literatura de ovário avançado os cortes usados vão de 10 a 18,5 e <strong>não existe padrão consolidado</strong> — o que é uma liberdade, desde que você pré-especifique e justifique. Deixe o corte escrito antes de ver os dados</td><td class="ev">Corte único, declarado, com a referência que o justifica</td><td class="ev">Testar vários cortes e reportar o melhor. Isso se chama corte otimizado e infla o resultado</td></tr>
+      <tr><td class="gene">4<small>Inventário real</small></td><td>Contar quantas pacientes têm <em>simultaneamente</em>: bulk, PCI, status de neoadjuvância e seguimento. A interseção é o n verdadeiro — nunca o maior dos números isolados</td><td class="ev">Fluxograma CONSORT-like de inclusão</td><td class="ev">Descobrir na análise que só metade tem PCI registrado</td></tr>
+      <tr><td class="gene">5<small>Congelar o plano</small></td><td>Escrever o plano de análise estatística: desfecho primário, escores pré-especificados, covariáveis, teste principal. Data e assinatura do orientador</td><td class="ev">Documento de 2 páginas que vira a seção de métodos</td><td class="ev">Deixar para depois. O plano escrito antes é o que separa validação de pescaria</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout" style="margin-top:24px;">
+    <h3>Decisão do passo 4: use o PCI contínuo como análise primária</h3>
+    <p>Se a interseção do passo 4 der menos de ~20 pacientes por grupo, dicotomizar o PCI joga fora poder estatístico que você não tem para gastar. A saída: <strong>análise primária com PCI como variável contínua</strong> (correlação ou regressão linear com o escore metabólico), e a divisão em alto vs baixo como análise secundária, para a figura. Você continua "dividindo por PCI" na apresentação, mas o teste que sustenta a conclusão é o contínuo.</p>
+    <p>Se optar mesmo pela dicotomia com n pequeno, use <strong>fenótipos extremos com gap declarado</strong> — por exemplo PCI ≤ 10 versus ≥ 20, excluindo o meio — e reporte quantas pacientes o gap excluiu. O gap aumenta o contraste; a exclusão precisa aparecer no fluxograma.</p>
+  </div>
+
+  <h3>Fase 1 · Single-cell — descobrir quem carrega o programa</h3>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Passo</th><th>O que fazer</th><th>O que sai dali</th><th>Armadilha</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">6<small>QC e integração</small></td><td>Filtrar células de baixa qualidade e alto conteúdo mitocondrial, remover dupletos, integrar as amostras tratando cada paciente como lote</td><td class="ev">Objeto limpo e integrado</td><td class="ev">Não integrar: as células se agrupam por paciente em vez de por tipo celular, e você interpreta lote como biologia</td></tr>
+      <tr><td class="gene">7<small>Anotar tipos celulares</small></td><td>Identificar tumor (<code>PAX8</code>, <code>WT1</code>, <code>EPCAM</code>), fibroblasto (<code>COL1A1</code>, <code>POSTN</code>), macrófago (<code>CD68</code>), T/NK (<code>CD3E</code>, <code>NKG7</code>), endotélio (<code>PECAM1</code>), mesotélio (<code>MSLN</code>, <code>UPK3B</code>)</td><td class="ev">Cada célula com um rótulo — a base de tudo que vem depois</td><td class="ev">Confiar em anotação automática sem conferir marcadores. Célula tumoral de HGSOC costuma ter perfil de número de cópias alterado: use isso para confirmar</td></tr>
+      <tr><td class="gene">8<small>Pontuar os módulos</small></td><td>Calcular, célula a célula, os escores dos eixos deste painel com método baseado em ranking (UCell ou AUCell), que é robusto a diferenças de profundidade entre células</td><td class="ev">Escore lipídico, glicolítico e de hipóxia por célula</td><td class="ev">Usar média simples de contagens: células com mais reads pontuam mais, e você mede profundidade de sequenciamento</td></tr>
+      <tr><td class="gene">9<small>Responder a pergunta-chave</small></td><td>Comparar os escores entre tipos celulares. O programa lipídico está na célula tumoral, no macrófago ou no fibroblasto?</td><td class="ev">A figura mais importante da Fase 1 — e a decisão de qual compartimento medir no bulk</td><td class="ev">Tratar "está no macrófago" como fracasso. É achado, e muda a narrativa do trabalho para imunometabolismo</td></tr>
+      <tr><td class="gene">10<small>Construir a referência</small></td><td>Exportar os perfis médios por tipo celular como matriz de referência para deconvolução</td><td class="ev">Referência interna, da sua própria doença e do seu próprio laboratório</td><td class="ev">Usar atlas público quando você tem referência própria — é desperdiçar a maior vantagem técnica do projeto</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Fase 2 · Bulk — onde mora a estatística</h3>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Passo</th><th>O que fazer</th><th>O que sai dali</th><th>Armadilha</th></tr></thead>
+    <tbody>
+      <tr><td class="gene">11<small>Deconvoluir</small></td><td>Rodar BayesPrism (ou CIBERSORTx) usando a referência do passo 10 em cada amostra de bulk</td><td class="ev">Fração estimada de cada tipo celular por amostra, e expressão específica do compartimento tumoral</td><td class="ev">Pular esta etapa. Sem ela, "escore lipídico alto" pode ser só mais adipócito e macrófago na amostra</td></tr>
+      <tr><td class="gene">12<small>Calcular os escores</small></td><td>ssGSEA ou GSVA sobre os módulos, de preferência na expressão do compartimento tumoral. Três escores pré-especificados: balanço lipídico-oxidativo ÷ glicolítico, captação ÷ síntese, e ACSL4 ÷ resistência à ferroptose</td><td class="ev">Três variáveis contínuas por paciente</td><td class="ev">Calcular quarenta genes individuais e testar todos. Três escores, não quarenta testes</td></tr>
+      <tr><td class="gene">13<small>Análise primária</small></td><td>Correlacionar cada escore com o PCI contínuo (Spearman) e, em seguida, no modelo ajustado por pureza tumoral, fração estromal, neoadjuvância e HRD</td><td class="ev">O resultado principal da dissertação</td><td class="ev">Reportar só o não ajustado quando ele é significativo e o ajustado não é. Reporte os dois, sempre, lado a lado</td></tr>
+      <tr><td class="gene">14<small>Checagens de sanidade</small></td><td>Antes de acreditar em qualquer coisa: <code>TP53</code> alterado em praticamente todos os casos (se não, revise o diagnóstico), <code>PAX8</code> positivo, e reprodução de um achado conhecido — por exemplo, mais CD8 associado a melhor sobrevida</td><td class="ev">Confiança de que o pipeline funciona</td><td class="ev">Descobrir um erro de anotação depois de escrever a discussão</td></tr>
+      <tr><td class="gene">15<small>Valor incremental</small></td><td>Modelo clínico basal (estádio, resíduo, HRD, idade) versus o mesmo modelo mais o escore metabólico</td><td class="ev">A resposta a "isso acrescenta algo ao que o clínico já tem?"</td><td class="ev">Não fazer. É o resultado que separa a tese defensável de mais uma assinatura publicada</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Fase 3 · Fechamento</h3>
+  <ol>
+    <li><strong>Camada imune, exploratória.</strong> No single-cell: os linfócitos T em tumores com escore lipídico alto estão mais exaustos (<code>PDCD1</code>, <code>TOX</code>, <code>LAG3</code>, <code>HAVCR2</code>)? Os macrófagos estão mais lipídicos (<code>TREM2</code>, <code>APOE</code>, <code>SPP1</code>)? Se houver dado de VDJ, a pergunta melhora: os <em>clones expandidos</em> estão mais exaustos? Declare como gerador de hipótese.</li>
+    <li><strong>Validação.</strong> Duas opções, não excludentes: replicar a associação em coorte pública com PCI ou substituto de carga (TCGA-OV, AOCS), e validar 3–5 marcadores por imuno-histoquímica no acervo FFPE retrospectivo, onde o n é maior. A IHQ é a que dá tração clínica.</li>
+    <li><strong>Redação dos limites.</strong> Escreva explicitamente: coorte pequena, desenho gerador de hipótese, PCI de fonte única, sem resolução espacial. Delimitar o alcance é rigor, não fraqueza.</li>
+  </ol>
+</section>
+
+<section>
+  <div class="axis-head"><h2>A que decisão clínica isso responde</h2></div>
+  <p class="lede">A pergunta a fazer antes de escrever o objetivo: <em>o que um clínico faria de diferente se o resultado fosse positivo?</em> Se a resposta é "nada", não é impacto clínico — é biologia interessante, o que já é uma tese válida, mas deve ser declarado como tal.</p>
+  <p class="prose">Assinaturas prognósticas em ovário são abundantes e quase nenhuma entrou em uso clínico, porque significância estatística não é a barra: a barra é <strong>ganho incremental sobre o que o clínico já tem</strong> — estádio, resíduo cirúrgico, status HRD, cinética de CA-125. Daí a etapa 5 acima não ser opcional.</p>
+  <p class="prose">Há, porém, uma decisão real e não resolvida onde um marcador do primário teria lugar: <strong>citorredução primária versus quimioterapia neoadjuvante</strong>. O TRUST mostrou ganho de sobrevida livre de progressão com cirurgia primária sem atingir o desfecho de sobrevida global, e a seleção de quem se beneficia segue em aberto. Um escore do tumor primário que estime propensão à disseminação peritoneal endereça exatamente esse vazio — e é uma moldura muito mais forte que "prediz prognóstico".</p>
+  <p class="prose">A segunda moldura, para a discussão: o eixo lipídico tem nós farmacologicamente acionáveis (estatinas, inibidores de FASN, SCD, CPT1 e DGAT1), com inibidores de FASN já em ensaio clínico em outros tumores. Identificar um subgrupo com dependência metabólica acionável é caminho mais curto para a clínica que mais um escore de risco — ainda que, em nível de mestrado, isso pertença à discussão e não ao objetivo.</p>
+</section>
+
+<section>
+  <div class="axis-head"><h2>Onde está a lacuna que sustenta a sua hipótese</h2></div>
+  <p class="prose">Quase toda a literatura lipídica de ovário descreve o sítio <em>metastático</em>: o omento, a ascite, o adipócito, o esferoide. Os poucos estudos que comparam primário e metástase o fazem em bulk, sem resolução espacial. O trabalho de 2025 sobre complemento é ilustrativo — mostra <code>C3</code> mais alto no implante omental que no primário, mas não responde se existe uma sub-região do primário que já se parece com o implante.</p>
+  <p class="prose">É exatamente esse o espaço do seu projeto: não "o tumor usa lipídio", que já está estabelecido, mas <strong>se o programa lipídico do sítio metastático já está espacialmente pré-formado numa região do tumor primário</strong> — plausivelmente na interface com a superfície serosa — e se a extensão dessa região prediz carga peritoneal. Formulado assim, o desenho tem hipótese falseável, unidade de análise definida (região, não paciente) e desfecho clínico ancorado. Vale escrever a pergunta nesses termos na qualificação.</p>
+</section>
+
+<section class="refs">
+  <div class="axis-head"><h2>Referências principais</h2></div>
+  <ol>
+    <li>Pascual G, et al. Targeting metastasis-initiating cells through the fatty acid receptor CD36. <em>Nature</em> 2016. <a href="https://www.nature.com/articles/nature20791">nature.com</a></li>
+    <li>Jarc E, et al. CD36 maintains lipid homeostasis via selective uptake of monounsaturated fatty acids during matrix detachment and tumor progression. <em>Cell Metabolism</em> 2023. <a href="https://www.cell.com/cell-metabolism/fulltext/S1550-4131(23)00368-6">cell.com</a></li>
+    <li>Mukherjee A, et al. Adipocyte-induced FABP4 expression in ovarian cancer cells promotes metastasis and mediates carboplatin resistance. <em>Cancer Research</em> 2020. <a href="https://aacrjournals.org/cancerres/article/80/8/1748/647747/Adipocyte-Induced-FABP4-Expression-in-Ovarian">aacrjournals.org</a></li>
+    <li>Nieman KM, et al. Adipocytes promote ovarian cancer metastasis and provide energy for rapid tumor growth. <em>Nature Medicine</em> 2011. <a href="https://www.nature.com/articles/nm.2492">nature.com</a></li>
+    <li>Complement activation at the interface between adipocytes and cancer cells drives tumor progression. <em>JCI Insight</em> 2025. <a href="https://insight.jci.org/articles/view/184935">insight.jci.org</a></li>
+    <li>Li J, et al. Lipid desaturation is a metabolic marker and therapeutic target of ovarian cancer stem cells. <em>Cell Stem Cell</em> 2017. <a href="https://www.cell.com/cell-stem-cell/fulltext/S1934-5909(16)30400-3">cell.com</a></li>
+    <li>Tesfay L, et al. Stearoyl-CoA desaturase 1 protects ovarian cancer cells from ferroptotic cell death. <em>Cancer Research</em> 2019. <a href="https://dx.doi.org/10.1158/0008-5472.CAN-19-0369">aacrjournals.org</a></li>
+    <li>Pakhira S, et al. Altered fatty acid oxidation via CPT1A promotes epithelial-to-mesenchymal transition in ovarian cancer. <em>The FEBS Journal</em> 2025. <a href="https://febs.onlinelibrary.wiley.com/doi/10.1111/febs.70193">wiley.com</a></li>
+    <li>CPT1A-mediated MFF succinylation promotes stemness maintenance in ovarian cancer stem cells. <em>Communications Biology</em> 2025. <a href="https://www.nature.com/articles/s42003-025-07720-w">nature.com</a></li>
+    <li>ASS1 enhances anoikis resistance via AMPK/CPT1A-mediated fatty acid metabolism in ovarian cancer. 2024. <a href="https://pubmed.ncbi.nlm.nih.gov/38914306/">pubmed</a></li>
+    <li>Cheng X, et al. Targeting DGAT1 ameliorates glioblastoma by increasing fat catabolism and oxidative stress. <em>Cell Metabolism</em> 2020. <a href="https://www.cell.com/cell-metabolism/fulltext/S1550-4131(20)30303-X">cell.com</a></li>
+    <li>The role of DGAT1 and DGAT2 in regulating tumor cell growth and their potential clinical implications. <em>J Transl Med</em> 2024. <a href="https://link.springer.com/article/10.1186/s12967-024-05084-z">springer.com</a></li>
+    <li>Ovarian cancer metastasis to the human omentum disrupts organ homeostasis and induces fundamental tissue reprogramming. <em>Nature Communications</em> 2025. <a href="https://www.nature.com/articles/s41467-025-67557-z">nature.com</a></li>
+    <li>Perilipin2-dependent lipid droplets accumulation promotes metastasis of oral squamous cell carcinoma via EMT. <em>Cell Death Discovery</em> 2025. <a href="https://www.nature.com/articles/s41420-025-02314-1">nature.com</a></li>
+    <li>LPCAT1-mediated membrane phospholipid remodelling promotes ferroptosis evasion and tumour growth. <em>Nature Cell Biology</em> 2024. <a href="https://www.nature.com/articles/s41556-024-01405-y">nature.com</a></li>
+    <li>Overexpression of LPCAT1 enhances endometrial cancer stemness and metastasis. 2022. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9827807/">pmc</a></li>
+    <li>Targeting ACSLs to modulate ferroptosis and cancer immunity. <em>Trends Endocrinol Metab</em> 2024. <a href="https://www.cell.com/trends/endocrinology-metabolism/article/S1043-2760(24)00255-8/fulltext">cell.com</a></li>
+    <li>Uptake of lipids from ascites drives NK cell metabolic dysfunction in ovarian cancer. <em>Science Immunology</em> 2025. <a href="https://www.science.org/doi/10.1126/sciimmunol.adr4795">science.org</a></li>
+    <li>Ascitic autotaxin as a potential prognostic, diagnostic, and therapeutic target for epithelial ovarian cancer. <em>British Journal of Cancer</em> 2023. <a href="https://www.nature.com/articles/s41416-023-02355-2">nature.com</a></li>
+    <li>The lysophosphatidic acid-regulated signal transduction network in ovarian cancer cells. <em>Theranostics</em> 2023. <a href="https://www.thno.org/v13p1921.htm">thno.org</a></li>
+    <li>Eckert MA, et al. Proteomics reveals NNMT as a master metabolic regulator of cancer-associated fibroblasts. <em>Nature</em> 2019. <a href="https://www.nature.com/articles/s41586-019-1173-8">nature.com</a></li>
+    <li>Suppression of the ABCA1 cholesterol transporter impairs the growth and migration of epithelial ovarian cancer. <em>Cancers</em> 2022. <a href="https://www.mdpi.com/2072-6694/14/8/1878">mdpi.com</a></li>
+    <li>Cholesterol efflux protein ABCA1 supports anticancer functions of myeloid immune cells. <em>Science Advances</em> 2025. <a href="https://www.science.org/doi/10.1126/sciadv.adx5490">science.org</a></li>
+    <li>Anti-tumor effects of mevalonate pathway inhibition in ovarian cancer. <em>BMC Cancer</em> 2020. <a href="https://bmccancer.biomedcentral.com/articles/10.1186/s12885-020-07164-x">biomedcentral.com</a></li>
+    <li>SREBF1-based metabolic reprogramming in prostate cancer promotes tumor ferroptosis resistance. <em>Cell Death Discovery</em> 2025. <a href="https://www.nature.com/articles/s41420-025-02354-7">nature.com</a></li>
+    <li>Mesothelial cells promote peritoneal invasion and metastasis of ascites-derived ovarian cancer cells through spheroid formation. <em>Science Advances</em> 2025. <a href="https://www.science.org/doi/full/10.1126/sciadv.adu5944">science.org</a></li>
+    <li>Omental preadipocytes stimulate matrix remodeling and IGF signaling to support ovarian cancer metastasis. <em>Cancer Research</em> 2024. <a href="https://aacrjournals.org/cancerres/article/84/13/2073/746137/Omental-Preadipocytes-Stimulate-Matrix-Remodeling">aacrjournals.org</a></li>
+    <li>TREM2-mediated regulation of myeloid cells in the tumor microenvironment. <em>npj Precision Oncology</em> 2025. <a href="https://www.nature.com/articles/s41698-025-01152-9">nature.com</a></li>
+    <li>Metabolic reprogramming from glycolysis to fatty acid uptake and beta-oxidation in platinum-resistant cancer cells. <em>Nature Communications</em> 2022. <a href="https://www.nature.com/articles/s41467-022-32101-w">nature.com</a></li>
+    <li>Systematic benchmarking of imaging spatial transcriptomics platforms in FFPE tissues. <em>Nature Communications</em> 2025. <a href="https://www.nature.com/articles/s41467-025-64990-y">nature.com</a></li>
+    <li>Prognostic value of miliary versus non-miliary sub-staging in advanced ovarian cancer. <em>Gynecologic Oncology</em> 2017. <a href="https://pubmed.ncbi.nlm.nih.gov/28495239/">pubmed</a></li>
+    <li>Comparative transcriptome analysis links miliary and non-miliary peritoneal spread with putative origin (tubes vs ovaries) in HGSOC. 2017. <a href="https://pubmed.ncbi.nlm.nih.gov/27940126/">pubmed</a></li>
+    <li>Neoadjuvant chemotherapy induces genomic and transcriptomic changes in ovarian cancer. <em>Cancer Research</em> 2022. <a href="https://aacrjournals.org/cancerres/article/82/1/169/674869/Neoadjuvant-Chemotherapy-Induces-Genomic-and">aacrjournals.org</a></li>
+    <li>Pathological chemotherapy response score is prognostic in tubo-ovarian HGSC: systematic review and IPD meta-analysis. <em>Gynecologic Oncology</em> 2020. <a href="https://www.sciencedirect.com/science/article/pii/S0090825819311813">sciencedirect.com</a></li>
+    <li>Transcriptomic subtypes in high-grade serous ovarian cancer are driven by tumor cellular composition. 2025. <a href="https://pubmed.ncbi.nlm.nih.gov/42079185/">pubmed</a></li>
+    <li>Cancer-associated stroma significantly contributes to the mesenchymal subtype signature of serous ovarian cancer. <em>Gynecologic Oncology</em> 2019. <a href="https://www.sciencedirect.com/science/article/abs/pii/S009082581831415X">sciencedirect.com</a></li>
+    <li>Dose-response relationship between ascites volume and survival in HGSOC. <em>Gland Surgery</em> 2025. <a href="https://gs.amegroups.org/article/view/149398/html">amegroups.org</a></li>
+    <li>Chu B, et al. Cell type and gene expression deconvolution with BayesPrism. <em>Nature Cancer</em> 2022. <a href="https://pubmed.ncbi.nlm.nih.gov/35469013/">pubmed</a></li>
+    <li>Ganzfried BF, et al. curatedOvarianData: clinically annotated data for the ovarian cancer transcriptome. <em>Database</em> 2013. <a href="https://academic.oup.com/database/article/doi/10.1093/database/bat013/330978">oup.com</a></li>
+    <li>MetaGxOvarian: transcriptomic ovarian cancer datasets. <em>Bioconductor</em>. <a href="https://www.bioconductor.org/packages/devel/data/experiment/manuals/MetaGxOvarian/man/MetaGxOvarian.pdf">bioconductor.org</a></li>
+    <li>Single-cell RNA sequencing reveals the tissue architecture in human HGSOC. <em>Clinical Cancer Research</em> 2022. <a href="https://aacrjournals.org/clincancerres/article/28/16/3590/707396/Single-Cell-RNA-Sequencing-Reveals-the-Tissue">aacrjournals.org</a></li>
+    <li>An optimised protocol for isolation of RNA from laser-capture microdissected FFPE tissue amenable for NGS. <em>BMC Mol Biol</em> 2017. <a href="https://bmcmolbiol.biomedcentral.com/articles/10.1186/s12867-017-0099-7">biomedcentral.com</a></li>
+    <li>Optimal timing of primary debulking surgery in advanced ovarian cancer: insights from the TRUST trial. <em>J Gynecol Oncol</em> 2025. <a href="https://www.ejgo.org/DOIx.php?id=10.3802%2Fjgo.2025.36.e132">ejgo.org</a></li>
+    <li>Phase II investigation of denifanstat (TVB-2640), FASN inhibitor. <em>Clinical Cancer Research</em> 2023. <a href="https://aacrjournals.org/clincancerres/article/29/13/2419/727354/Phase-II-Investigation-of-TVB-2640-Denifanstat">aacrjournals.org</a></li>
+    <li>Statin use and survival among women with ovarian cancer: Australian national data-linkage study. <em>Br J Cancer</em> 2021. <a href="https://www.nature.com/articles/s41416-021-01460-4">nature.com</a></li>
+    <li>Molecular subtypes of ovarian cancer based on lipid metabolism and glycolysis. <em>Front Biosci</em> 2023. <a href="https://www.imrpress.com/journal/FBL/28/10/10.31083/j.fbl2810253">imrpress.com</a></li>
+    <li>Spatial transcriptomic profiling of ovarian clear cell carcinoma reveals heterogeneity in OXPHOS and EMT gradients. <em>Nature Communications</em> 2026. <a href="https://www.nature.com/articles/s41467-026-74593-w">nature.com</a></li>
+    <li>Expression of GLUT-1 in epithelial ovarian carcinoma: correlation with proliferation, angiogenesis, survival and ability to predict optimal cytoreduction. <em>Gynecol Oncol</em> 2011. <a href="https://pubmed.ncbi.nlm.nih.gov/21167567/">pubmed</a></li>
+    <li>Adipophilin as prognostic biomarker in clear cell renal cell carcinoma. <em>Oncotarget</em> 2017. <a href="https://www.oncotarget.com/article/15639/">oncotarget.com</a></li>
+    <li>Whole exome sequencing-based homologous recombination deficiency test for epithelial ovarian cancer. <em>J Ovarian Res</em> 2024. <a href="https://ovarianresearch.biomedcentral.com/articles/10.1186/s13048-024-01565-3">biomedcentral.com</a></li>
+    <li>Dose-response association of CD8⁺ tumor-infiltrating lymphocytes and survival time in HGSOC. <em>JAMA Oncology</em> 2017. <a href="https://pubmed.ncbi.nlm.nih.gov/29049607/">pubmed</a></li>
+    <li>Prognostic impact of tumor-infiltrating lymphocytes in HGSOC: systematic review and meta-analysis. 2021. <a href="https://pubmed.ncbi.nlm.nih.gov/33193829/">pubmed</a></li>
+    <li>Current understanding on why ovarian cancer is resistant to immune checkpoint inhibitors. 2023. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10341806/">pmc</a></li>
+    <li>Deciphering T-cell exhaustion in the tumor microenvironment. <em>Front Immunol</em> 2025. <a href="https://www.frontiersin.org/journals/immunology/articles/10.3389/fimmu.2025.1548234/full">frontiersin.org</a></li>
+    <li>Does a high peritoneal cancer index lead to a worse prognosis in advanced ovarian cancer? Systematic review and meta-analysis. <em>Front Oncol</em> 2024. <a href="https://www.frontiersin.org/journals/oncology/articles/10.3389/fonc.2024.1421828/full">frontiersin.org</a></li>
+    <li>Prognostic role of the peritoneal cancer index in ovarian cancer patients undergoing cytoreductive surgery: a meta-analysis. 2023. <a href="https://pubmed.ncbi.nlm.nih.gov/37718231/">pubmed</a></li>
+    <li>The peritoneal cancer index is a strong predictor of incomplete cytoreductive surgery in ovarian cancer. <em>Ann Surg Oncol</em> 2020. <a href="https://link.springer.com/article/10.1245/s10434-020-08649-6">springer.com</a></li>
+    <li>UCell: robust and scalable single-cell gene signature scoring. <a href="https://www.researchgate.net/publication/400660498_UCell_and_pyUCell_single-cell_gene_signature_scoring_for_R_and_python">researchgate.net</a></li>
+    <li>Comparative analysis of single-cell pathway scoring methods. <em>NAR Genomics and Bioinformatics</em> 2024. <a href="https://academic.oup.com/nargab/article/6/3/lqae124/7770961">oup.com</a></li>
+    <li><em>— Bloco B, glicolítico (adicionado v2) —</em></li>
+    <li>Expression of hexokinase 2 in epithelial ovarian tumors and its clinical significance in serous ovarian cancer. 2014. <a href="https://pubmed.ncbi.nlm.nih.gov/25423696/">pubmed</a></li>
+    <li>The emerging role of glycolysis and immune evasion in ovarian cancer. <em>Cancer Cell International</em> 2025. <a href="https://link.springer.com/article/10.1186/s12935-025-03698-x">springer.com</a></li>
+    <li>Pyruvate kinase M2 is a poor prognostic marker of and a therapeutic target in ovarian cancer. <em>PLOS ONE</em>. <a href="https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0182166">plos.org</a></li>
+    <li>Establishment of a novel glycolysis-related prognostic gene signature for ovarian cancer and its relationships with immune infiltration of the tumor microenvironment. <em>J Transl Med</em> 2021. <a href="https://link.springer.com/article/10.1186/s12967-021-03057-0">springer.com</a></li>
+    <li>Ovarian cancer relies on glucose transporter 1 to fuel glycolysis and growth: anti-tumor activity of BAY-876. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6356953">pmc</a></li>
+    <li>Ovarian cancer spheroid cells with stem cell-like properties contribute to tumor generation, metastasis and chemotherapy resistance through hypoxia-resistant metabolism. <em>PLOS ONE</em> 2013. <a href="https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0084941">plos.org</a></li>
+    <li>Hypoxia-inducible factor-1α induces CX3CR1 expression and promotes the epithelial to mesenchymal transition in ovarian cancer cells. 2019. <a href="https://pubmed.ncbi.nlm.nih.gov/31077234/">pubmed</a></li>
+    <li>Lactate-mediated metabolic reprogramming of tumor-associated macrophages: implications for tumor progression and therapeutic potential. <em>Front Immunol</em> 2025. <a href="https://www.frontiersin.org/journals/immunology/articles/10.3389/fimmu.2025.1573039/full">frontiersin.org</a></li>
+    <li>Lactate and lactylation: dual regulators of T-cell-mediated tumor immunity and immunotherapy. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11674224/">pmc</a></li>
+    <li>SLC16A3 (MCT4) expression in tumor immunity and metabolism: insights from pan-cancer analysis. 2025. <a href="https://www.sciencedirect.com/science/article/pii/S2405580825001219">sciencedirect.com</a></li>
+    <li>A systemic analysis of monocarboxylate transporters in ovarian cancer and possible therapeutic interventions. 2023. <a href="https://pubmed.ncbi.nlm.nih.gov/37934721/">pubmed</a></li>
+    <li>Spheroid formation and peritoneal metastasis in ovarian cancer: the role of stromal and immune components. <em>Int J Mol Sci</em> 2022. <a href="https://www.mdpi.com/1422-0067/23/11/6215">mdpi.com</a></li>
+    <li>Acidic ascites inhibits ovarian cancer cell proliferation and correlates with the metabolomic, lipidomic and inflammatory phenotype of human patients. <em>J Transl Med</em> 2022. <a href="https://link.springer.com/article/10.1186/s12967-022-03763-3">springer.com</a></li>
+  </ol>
+</section>
+
+<footer>
+  Documento de apoio ao desenho experimental — não substitui validação em bases de expressão do seu próprio coorte (TCGA-OV, GSEs de HGSOC pareado) antes de fechar o painel. Prioridades refletem força de evidência em ovário e viabilidade de detecção, não impacto esperado. v2 (set/2026) acrescenta o Bloco B — metabolismo glicolítico (Eixos 9-11) — e a leitura do painel para desenho em bulk RNA-seq isolado, sem alterar o conteúdo original do Bloco A lipídico (Eixos 1-8).
+</footer>
+
+</div>
+</body>
+</html>
